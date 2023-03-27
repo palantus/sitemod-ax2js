@@ -1,0 +1,19 @@
+{
+  "name": "sitemod-ax2js",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fast-xml-parser": "^3.21.1",
+    "jison-gho": "^0.6.1-216",
+    "js-beautify": "^1.14.7"
+  },
+  "sitecore": {
+    "dependencies": [
+      "ld2"
+    ]
+  }
+}
