@@ -1,4 +1,4 @@
-import {pageElement} from "/system/core.mjs"
+import {pageElement} from "../../system/core.mjs"
 import "./Form.mjs"
 import Form from "./Form.mjs";
 import {enumNum} from "./Global.mjs"
