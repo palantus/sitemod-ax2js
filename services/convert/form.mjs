@@ -113,7 +113,8 @@ function storeControl(element, parent, metadata){
 export function expandFormControl(e){
   if(e.dataField){
     if(!e.dataSource) return;
-    let ds = Entity.find(`tag:fds element.id:${e.related.element} prop:name=${e.dataSource}`)
+    let ds = Entity.find(`tag:fds element.id:${e.related.element?._id} prop:name=${e.dataSource}`)
+    if(!ds) return console.log(`Control ${e._id}:${e.name} has a datasource ${e.dataSource}, which doesn't exist`);
 
     let fieldName = e.dataField.substr(0, (e.dataField.indexOf("[")+1 || e.dataField.length+1)-1)
 

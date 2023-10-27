@@ -4,6 +4,7 @@ import Entity from "entitystorage"
 import MenuItem from "../../../models/menuitem.mjs"
 import Element from "../models/element.mjs"
 import Mod from "../../../models/mod.mjs"
+import { generateMenu } from "../../../services/menu.mjs";
 
 export async function compileAll(){
   // Enable the one below in the future for performance:
@@ -45,5 +46,5 @@ export async function compileAll(){
     let menu = mainMenuItem.related.menu;
     addMenuItems(menu, `/${menu?.label||mainMenuItem.name}`)
   }
-
+  generateMenu();
 }

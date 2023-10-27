@@ -9,7 +9,7 @@ export function convertEnum(enumeration, metadata) {
   let values = getArray(metadata.EnumValues?.AxEnumValue)
 
   for(let value of values){
-    let v = new Entity().tag("tablefield").rel(enumeration, "element")
+    let v = new Entity().tag("enumvalue").rel(enumeration, "element")
     enumeration.rel(v, "value")
     storeProperties(v, value)
   }
