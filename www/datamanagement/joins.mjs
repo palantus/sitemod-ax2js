@@ -1,5 +1,5 @@
-import {getCachedElementById} from "/e/class/Metadata.mjs"
-import {tableNum} from "/e/class/Global.mjs"
+import {getCachedElementById} from "../e/class/Metadata.mjs"
+import {tableNum} from "../e/class/Global.mjs"
 
 export function attemptJoinRecordAndQBDS(parentTableId, record, qbds){
   qbds.clearRanges()

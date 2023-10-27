@@ -1,6 +1,6 @@
 import {getTableData} from "./data.mjs"
 import {tableId2Name} from "../e/class/Global.mjs"
-import JoinMode from "/e/enum/JoinMode.mjs"
+import JoinMode from "../e/enum/JoinMode.mjs"
 import {addAutoLinks} from "./joins.mjs"
 
 export async function runQuery (q) {

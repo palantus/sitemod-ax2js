@@ -1,4 +1,4 @@
-import Toast from "/components/toast.mjs"
+import Toast from "../components/toast.mjs"
 let reader;
 let dataReadyFunction;
 let recIdCounter = 1;
@@ -19,7 +19,7 @@ export async function tryUpgrade(){
   if(isUpgradeDone) return;
   isUpgradeDone = true;
   try{
-    let upgrade = await import("/datamanagement/dataupgrade.mjs")
+    let upgrade = await import("./dataupgrade.mjs")
     if(upgrade && upgrade.default){
       await upgrade.default()
     }

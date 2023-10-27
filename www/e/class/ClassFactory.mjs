@@ -1,4 +1,4 @@
-import FormRun from "/e/class/FormRun.mjs"
+import FormRun from "./FormRun.mjs"
 
 class ClassFactory{
   static async formRunClass(args){

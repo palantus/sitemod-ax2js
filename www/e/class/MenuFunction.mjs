@@ -1,6 +1,6 @@
-import ClassFactory from "/e/class/ClassFactory.mjs"
-import {getElementByType} from "/e/class/Metadata.mjs"
-import Args from "/e/class/Args.mjs"
+import ClassFactory from "./ClassFactory.mjs"
+import {getElementByType} from "./Metadata.mjs"
+import Args from "./Args.mjs"
 
 class MenuFunction{
   constructor(menuItemName, menuItemType){
