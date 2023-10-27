@@ -15,8 +15,8 @@ export default class FormComboBoxControl extends FormField{
 
   initFromMeta(meta){
     super.initFromMeta(meta)
-    this.enumMetadata =  meta.children.type?.[0] || meta.children.tableField?.[0]?.children?.type?.[0] || null
-    this.properties.enumType = meta.enumType || meta.children.tableField?.[0].enumType || meta.children.tableField?.[0]?.children?.type?.[0]?.name || ""
+    this.enumMetadata =  meta.children.type?.[0] || meta.children.tablefield?.[0]?.children?.type?.[0] || null
+    this.properties.enumType = meta.enumType || meta.children.tablefield?.[0].enumType || meta.children.tablefield?.[0]?.children?.type?.[0]?.name || ""
   }
 
   enumType(typeNum){

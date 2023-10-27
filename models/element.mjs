@@ -30,7 +30,7 @@ export default class Element extends Entity{
           delete obj.children[rel]
         } else {
           /*
-          if(this.tags.includes("formcontrol") && rel == "tableField")
+          if(this.tags.includes("formcontrol") && rel == "tablefield")
             obj[rel] = obj.children[rel][0].toObj();
           else if(this.tags.includes("tablefield") && rel == "type")
             obj[rel] = obj.children[rel][0].toObj();

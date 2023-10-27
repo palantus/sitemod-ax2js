@@ -135,7 +135,7 @@ export function expandFormControl(e){
       }
     }
 
-    e.rel(tableField, "tableField")
+    e.rel(tableField, "tablefield")
   } else if(e.enumType){
     let enumType = Entity.find(`tag:enum prop:name=${e.enumType}`)
     if(!enumType){
@@ -238,7 +238,7 @@ export function createMissingFormControlsInGroup(e){
                               .prop("dataSource", ds.name)
                               .prop("dataField", gf.dataField)
                               .prop("type", "ComboBox")
-                              .rel(field, "tableField")
+                              .rel(field, "tablefield")
         e.rel(ctl, "control")
         break;
 
@@ -249,7 +249,7 @@ export function createMissingFormControlsInGroup(e){
 }
 
 export function updateFormFieldJumpAndLookup(e){
-  let tableField = e.related?.tableField
+  let tableField = e.related?.tablefield
   if(!tableField) return;
   let type = tableField.related?.type
   if(!type) return;
@@ -262,5 +262,5 @@ export function updateFormFieldJumpAndLookup(e){
   let mi = Entity.find(`tag:menuitem prop:name=${relatedTable.formRef} prop:type=menuitemdisplay`)
   if(!mi) return;
 
-  e.rel(mi, "jumpRef")
+  e.rel(mi, "jumpref")
 }

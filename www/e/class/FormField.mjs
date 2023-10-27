@@ -5,10 +5,10 @@ import Args from "./Args.mjs"
 export default class FormField extends FormControl{
   initFromMeta(meta){
     super.initFromMeta(meta)
-    this.label(meta.label || meta.text || meta.children.type?.[0].label || meta.children.tableField?.[0].label || meta.children.tableField?.[0]?.children?.type?.[0]?.label || "")
+    this.label(meta.label || meta.text || meta.children.type?.[0].label || meta.children.tablefield?.[0].label || meta.children.tablefield?.[0]?.children?.type?.[0]?.label || "")
     this.dataField(meta.dataField)
 
-    this.pJumpRef = meta.children?.jumpRef?.[0]
+    this.pJumpRef = meta.children?.jumpref?.[0]
   }
 
   label(label = this.properties.label){
