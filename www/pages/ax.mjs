@@ -1,13 +1,13 @@
 const elementName = 'ax-page'
 
-import {goto, state} from "/system/core.mjs"
-import "/components/field-edit.mjs"
+import {goto, state} from "../system/core.mjs"
+import "../components/field-edit.mjs"
 import MenuFunction from "../e/class/MenuFunction.mjs";
-import {load} from "/e/class/Metadata.mjs"
+import {load} from "../e/class/Metadata.mjs"
 import {dataReady, tryUpgrade} from "../datamanagement/data.mjs"
 import {setReader} from "../datamanagement/data.mjs"
-import LD2Reader from "/libs/ld2reader.mjs"
-import { alertDialog } from "/components/dialog.mjs"
+import LD2Reader from "../libs/ld2reader.mjs"
+import { alertDialog } from "../components/dialog.mjs"
 
 const template = document.createElement('template');
 template.innerHTML = `

@@ -1,15 +1,20 @@
-import api from "/system/api.mjs";
-import { alertDialog } from "/components/dialog.mjs"
+import api from "../system/api.mjs";
+import { alertDialog } from "../components/dialog.mjs"
 
-const elementName = 'ax-page'
+const elementName = 'ax-admin-page'
 
 const template = document.createElement('template');
 template.innerHTML = `
   <link rel='stylesheet' href='/css/global.css'>
   <style>
+    #container{
+      padding: 10px;
+    }
   </style>  
   
   <div id="container">
+    <h1>AX administration</h1>
+
     <button class="styled" id="read">Read metadata</button>
     <button class="styled" id="compile">Compile all</button>
   </div>

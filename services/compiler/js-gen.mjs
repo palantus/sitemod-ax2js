@@ -1,7 +1,7 @@
 import Entity from 'entitystorage'
 import ClassGen from './js-classgen.mjs'
 import js_beautify from 'js-beautify';
-import { readdir } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';
 let beautify = js_beautify.js
 
 let globalCaseMap;
@@ -548,11 +548,14 @@ class Compiler{
 }
 
 export async function initJSCompiler(){
-  let imp = await import('../../www/e/class/Global.mjs')
-  globalCaseMap = Object.keys(imp).reduce((obj, cur) => {
-    obj[cur.toLowerCase()] = cur
-    return obj
-  }, {})
+ let globalFile = await readFile('./mods/ax2js/www/e/class/Global.mjs', "utf8");
+ globalCaseMap = [...globalFile.matchAll(/function\s+([a-zA-Z0-9]+)\(/g)]
+               .map(match => match[1])
+               .reduce((obj, cur) => {
+                 obj[cur.toLowerCase()] = cur
+                 return obj
+               }, {})
+ 
 
   overriddenClassesCaseMap = (await readdir('./mods/ax2js/www/e/class')).map(f => f.slice(0, -4)).reduce((obj, cur) => {
     obj[cur.toLowerCase()] = cur

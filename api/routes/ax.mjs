@@ -25,11 +25,12 @@ export default (app) => {
 
   route.post('/compile', function (req, res, next) {
     compileAll()
-      .catch(err => {
-        res.json({success: false, error: err})
-      })
       .then(() => {
         res.json({success: true})
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({success: false, error: err})
       })
   });
 };
