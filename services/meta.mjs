@@ -1,5 +1,5 @@
 
-import Element from "../models/element.js"
+import Element from "../models/element.mjs"
 
 class Service{
 

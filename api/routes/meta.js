@@ -1,5 +1,5 @@
 import express from "express"
-import Element from "../../models/element.js"
+import Element from "../../models/element.mjs"
 import service from "../../services/meta.mjs";
 
 const route = express.Router();

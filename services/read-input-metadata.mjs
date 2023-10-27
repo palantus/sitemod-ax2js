@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'fs'
 import parser from 'fast-xml-parser';
 import Entity from "entitystorage"
-import Element from "../models/element.js";
+import Element from "../models/element.mjs";
 import {convert, expandAllElements, mergeExtensions, updateReferences} from "./convert.mjs"
 
 export async function readMetadata(){
