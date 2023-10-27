@@ -15,11 +15,12 @@ export default (app) => {
 
   route.post('/read-metadata', function (req, res, next) {
     readMetadata()
-      .catch(err => {
-        res.json({success: false, error: err})
-      })
       .then(() => {
         res.json({success: true})
+      })
+      .catch(err => {
+        console.log(err)
+        res.json({success: false, error: err})
       })
   });
 
