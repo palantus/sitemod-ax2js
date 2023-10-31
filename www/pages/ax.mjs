@@ -1,6 +1,6 @@
 const elementName = 'ax-page'
 
-import {goto, state} from "../system/core.mjs"
+import {goto, state, stylesheets} from "../system/core.mjs"
 import "../components/field-edit.mjs"
 import MenuFunction from "../e/class/MenuFunction.mjs";
 import {load} from "../e/class/Metadata.mjs"
@@ -12,7 +12,6 @@ import { alertDialog } from "../components/dialog.mjs"
 const template = document.createElement('template');
 template.innerHTML = `
 
-  <link rel='stylesheet' href='../css/global.css'>
   <style>
     #container{
       padding: 10px;
@@ -78,7 +77,8 @@ class Element extends HTMLElement {
   constructor() {
     super();
 
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: 'open' })
+        .adoptedStyleSheets = [stylesheets.global];
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     
     this.readSingleFile = this.readSingleFile.bind(this);
