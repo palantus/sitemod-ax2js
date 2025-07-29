@@ -184,7 +184,7 @@ export function convertFormExtension(ext, metadata) {
 export function mergeFormExtension(ext){
   let form = ext.related.form
 
-  ext.rels.control.forEach((item, idx) => {
+  ext.rels.control?.forEach((item, idx) => {
     let parent = item.parent ? Entity.find(`tag:formcontrol element.id:${form} prop:name=${item.parent}`) : null;
     let previousSibling = item.previousSibling ? Entity.find(`tag:formcontrol element.id:${form} prop:name=${item.previousSibling}`) : null;
     
