@@ -29,6 +29,14 @@ export default (app) => {
     res.json(result)
   });
 
+  route.get('/elements/:type', (req, res) => {
+    res.json(Element.allByType(req.params.type).map(t => t.name));
+  })
+  
+  route.get('/types', (req, res) => {
+    res.json([...Element.all().reduce((set, cur) => {set.add(cur.type);return set}, new Set())]);
+  })
+
   route.get('/form/:name/:control/:func.xpp', function (req, res, next) {
     let form = Element.lookupType("form", req.params.name)
     let element = Element.find(`(tag:formcontrol|tag:fds) element.id:${form} prop:name=${req.params.control}`)
