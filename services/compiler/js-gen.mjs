@@ -108,7 +108,7 @@ class Compiler{
   }
 
   compileDeclaration(){
-    let ast = this.e.related.declaration?.related.ast.source
+    let ast = this.e.related.declaration?.related.ast?.source
     let body = [];
 
 
@@ -134,7 +134,7 @@ class Compiler{
       return '';
     }
 
-    let baseType = this.idToBaseType(ast.vartype.id)
+    let baseType = this.idToBaseType(ast.vartype)
     this.rootContext.variables.push({type: "this", id: ast.name.id, baseType: baseType||null})
 
     if(ast.defval){
@@ -313,7 +313,7 @@ class Compiler{
 		if(ast.defval != undefined){
 			ret += " = " + this.compileExpression(ast.defval, context);
 		} else {
-      let baseType = this.idToBaseType(ast.vartype?.id||ast.vartype)
+      let baseType = this.idToBaseType(ast.vartype)
       ret += ` = ${this.nullValueForBaseType(baseType, ast.vartype.id, context)}`
     }
 
@@ -323,7 +323,7 @@ class Compiler{
 	compileVariableDeclarationMore(ast, context){
 		var ret = this.compileId(ast.name, context);
 		if(ast.more != undefined){
-			ret += ", " + this.compile_variabledeclaration_more(ast.more, context);
+			ret += ", " + this.compileVariableDeclarationMore(ast.more, context);
 		}
 		return ret;
   }
@@ -382,7 +382,7 @@ class Compiler{
         let f = Entity.find(`tag:tablefield element.prop:name=${ast.parameters[0].id.id} prop:name=${ast.parameters[1].id.id}`)
         return f ? `${f._id}` : `fieldNum("${ast.parameters[0].id.id}", "${ast.parameters[1].id.id}")`
       case "tablenum":
-        let t = Entity.find(`tag:table prop:name=${ast.parameters.id.id}`)
+        let t = Entity.find(`tag:table prop:name=${ast.parameters[0].id.id}`)
         return t ? `${t._id}` : `tableNum("${ast.parameters[0].id.id}")`
     }
 
@@ -477,26 +477,32 @@ class Compiler{
   }
 
   idToBaseType(id){
-    if(["str", "int", "real", "int64", "container", "boolean", "date"].includes(id.toLowerCase()))
-      return id.toLowerCase()
+    if(typeof id?.id === "string" && ["str", "int", "real", "int64", "container", "boolean", "date"].includes(id.id.toLowerCase()))
+      return id.id.toLowerCase()
+    if(typeof id === "object" && id.type == "dotnetsystemcall") 
+      return id.type;
 
-    let typeEntity = Entity.find(`prop:name=${id} (tag:table|tag:class|tag:edt|tag:enum)`)
-    if(typeEntity){
-      switch(typeEntity.type){
-        case "table":
-          return "tablebuffer";
-        case "edt":
-          if(!typeEntity.edtType) console.log(`EDT ${typeEntity.name} is missing edtType`)
-          return typeEntity.edtType
-        case "enum":
-          return 'enum'
-        case "class":
-          return 'class'
+    let typeIdStr = typeof id === "string" ? id : (id?.id || null);
+
+    if(typeIdStr){
+      let typeEntity = Entity.find(`prop:name=${typeIdStr} (tag:table|tag:class|tag:edt|tag:enum)`)
+      if(typeEntity){
+        switch(typeEntity.type){
+          case "table":
+            return "tablebuffer";
+          case "edt":
+            if(!typeEntity.edtType) console.log(`EDT ${typeEntity.name} is missing edtType`)
+            return typeEntity.edtType
+          case "enum":
+            return 'enum'
+          case "class":
+            return 'class'
+        }
       }
-    }
 
-    if(overriddenClassesCaseMap[id.toLowerCase()])
-      return "class"
+      if(overriddenClassesCaseMap[typeIdStr.toLowerCase()])
+        return "class"
+    }
 
     console.log(`Unknown type for id ${id}`)
     return 'class';
@@ -514,6 +520,7 @@ class Compiler{
       case "date": return '0';
       case "enum": return '0';
       case "class": return 'null';
+      case "dotnetsystemcall": return 'null';
       case "tablebuffer": 
         this.refUsed(overriddenClassesCaseMap[varName.toLowerCase()] || varName, context)
         return `new ${varName}()`;

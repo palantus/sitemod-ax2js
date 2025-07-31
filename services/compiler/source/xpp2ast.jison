@@ -319,12 +319,19 @@ methodvariables
   ;
 
 methodcallparams
-  : e COMMA methodcallparams
-    {$$ = [$1, $3]}
+  : e COMMA methodcallparamsinner
+    {$$ = [$1, ...$3]}
   | e
-    {$$ = $1}
+    {$$ = [$1]}
   |
-    {$$ = {type: "empty"}}
+    {$$ = []}
+  ;
+
+methodcallparamsinner
+  : e COMMA methodcallparamsinner
+    {$$ = [$1, ...$3]}
+  | e
+    {$$ = [$1]}
   ;
 
 methodexposure

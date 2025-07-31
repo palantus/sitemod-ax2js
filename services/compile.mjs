@@ -19,12 +19,14 @@ export async function compileAll(){
   await initJSCompiler()
     
   // Generate AST:
-  Entity.search("xpp.tag:xpp element.prop:name=^AhkPet").forEach(e => genAST(e))
+  //Entity.search("xpp.tag:xpp element.prop:name=^AhkPet").forEach(e => genAST(e))
+  Entity.search("xpp.tag:xpp").forEach(e => genAST(e))
   let s = status()
   console.log(`Generated AST for ${s.success} of ${s.total} functions. The remaining ${s.failed} failed.`)
 
   // Compile to Javascript:
-  Entity.search("prop:name=^AhkPet (tag:form|tag:table|tag:class)").forEach(e => compileElement(e))
+  //Entity.search("prop:name=^AhkPet (tag:form|tag:table|tag:class)").forEach(e => compileElement(e))
+  Entity.search("(tag:form|tag:table|tag:class)").forEach(e => compileElement(e))
   
   // Refresh menu:
   let miOwner = Mod.lookup("ax2js")
