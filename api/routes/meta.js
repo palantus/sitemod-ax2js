@@ -30,7 +30,7 @@ export default (app) => {
   });
 
   route.get('/elements/:type', (req, res) => {
-    res.json(Element.allByType(req.params.type).map(t => t.name));
+    res.json(Element.allByType(req.params.type).map(t => ({id: t._id, name: t.name})));
   })
   
   route.get('/types', (req, res) => {

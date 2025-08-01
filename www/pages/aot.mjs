@@ -5,6 +5,7 @@ import "../components/field-edit.mjs"
 import { alertDialog } from "../components/dialog.mjs"
 import api from "../system/api.mjs";
 
+
 const template = document.createElement('template');
 template.innerHTML = `
 
@@ -48,12 +49,27 @@ template.innerHTML = `
         <div>
           <label for="view-select">View: </label>
           <select id="view-select">
-            <option value=""></option>
+            <option value="empty"></option>
             <option value="meta" selected>Metadata</option>
             <option value="children" selected>Children</option>
           </select>
         </div>
-        <div id="view"></div>
+        <div id="view">
+          <div id="empty-view" class="view"></div>
+          <div id="meta-view" class="view"></div>
+          <div id="children-view" class="view">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Name</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="children"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -69,11 +85,13 @@ class Element extends HTMLElement {
 
     this.typeSelectChanged = this.typeSelectChanged.bind(this);
     this.elementChanged = this.elementChanged.bind(this);
+    this.childClick = this.childClick.bind(this);
     this.refreshView = this.refreshView.bind(this);
 
     this.shadowRoot.getElementById("type-select").addEventListener("change", this.typeSelectChanged);
     this.shadowRoot.getElementById("elements").addEventListener("click", this.elementChanged);
     this.shadowRoot.getElementById("view-select").addEventListener("click", this.refreshView);
+    this.shadowRoot.getElementById("children").addEventListener("click", this.childClick);
   }
 
   async refreshData(){
@@ -86,42 +104,60 @@ class Element extends HTMLElement {
 
   async typeSelectChanged(){
     let type = this.shadowRoot.getElementById("type-select").value;
+    if(!type) return this.shadowRoot.getElementById("elements").innerHTML = '';
     this.shadowRoot.getElementById("view").dataset.type = type;
     let elements = await api.get(`meta/elements/${type}`);
     this.shadowRoot.getElementById('elements').innerHTML = elements.map(e => `
-      <div class="element" data-name="${e}">${e}</div>
+      <div class="element" data-name="${e.name}" data-id="${e.id}">${e.name}</div>
     `).join('');
   }
 
   async elementChanged(e){
-    let name = e.target.dataset.name;
-    this.shadowRoot.getElementById("view").dataset.name = name;
+    let id = e.target.dataset.id;
+    this.shadowRoot.getElementById("view").dataset.id = id;
 
     this.refreshView();
   }
 
   async refreshView(){
-    let type = this.shadowRoot.getElementById("view").dataset.type;
-    let name = this.shadowRoot.getElementById("view").dataset.name;
+    let id = this.shadowRoot.getElementById("view").dataset.id;
+    let view = this.shadowRoot.getElementById("view-select").value;
 
-    switch(this.shadowRoot.getElementById("view-select").value){
+    this.shadowRoot.getElementById("view").querySelectorAll(".view").forEach(e => {
+      e.classList.toggle("hidden", e.id != `${view}-view`);
+    });
+
+    switch(view){
       case "meta":
-        return this.refreshViewMeta(type, name);
+        return this.refreshViewMeta(id);
       case "children":
-        return this.refreshViewChildren(type, name);
-      default:
-        this.shadowRoot.getElementById("view").innerHTML = ``;
+        return this.refreshViewChildren(id);
     }
   }
 
-  async refreshViewMeta(type, name){
-    let meta = await api.get(`meta/${type}/${name}`);
-    this.shadowRoot.getElementById("view").innerHTML = `
+  async refreshViewMeta(id){
+    if(!id) return this.shadowRoot.getElementById("meta-view").innerHTML = '';
+    let meta = await api.get(`meta/${id}`);
+    this.shadowRoot.getElementById("meta-view").innerHTML = `
       <pre>${JSON.stringify(meta, 0, 2)}</pre>
     `
   }
   
-  async refreshViewChildren(type, name){
+  async refreshViewChildren(id){
+    if(!id) return this.shadowRoot.getElementById("children").innerHTML = '';
+    let meta = await api.get(`meta/${id}`);
+    let children = meta.children || {};
+    this.shadowRoot.getElementById("children").innerHTML = Object.keys(children)
+                                                                 .reduce((all, cur) => [...children[cur], ...all], [])
+                                                                 .map(c => `
+      <tr><td>${c.type||"N/A"}</td><td>${c.name||c.type}</td><td><button data-id="${c.id}">Show</button></td></tr>
+    `).join('')||"";
+  }
+
+  async childClick(e){
+    let id = e.target.dataset.id;
+    if(!id) return;
+    this.elementChanged(e);
   }
 
   connectedCallback() {
