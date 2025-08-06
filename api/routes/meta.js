@@ -86,6 +86,26 @@ export default (app) => {
     res.send(element?.related?.js?.source || (element?`export default class ${element.name}{}`: null))
   });
 
+  route.get('/:id/xpp', function (req, res, next) {
+    let xpp = Element.lookup(req.params.id)?.related.xpp?.source;
+    if(!xpp) return res.sendStatus(404);
+    res.setHeader('content-type', 'text/plain');
+    res.send(xpp)
+  });
+  
+  route.get('/:id/js', function (req, res, next) {
+    let xpp = Element.lookup(req.params.id)?.related.js?.source;
+    if(!xpp) return res.sendStatus(404);
+    res.setHeader('content-type', 'text/plain');
+    res.send(xpp)
+  });
+  
+  route.get('/:id/ast', function (req, res, next) {
+    let ast = Element.lookup(req.params.id)?.related.ast?.source;
+    if(!ast) return res.sendStatus(404);
+    res.json(ast)
+  });
+  
   route.get('/:type/:name', function (req, res, next) {
     res.json(Element.lookupType(req.params.type, req.params.name)?.toObj())
   });
@@ -94,11 +114,4 @@ export default (app) => {
     res.json(Element.lookup(req.params.id).toObj())
   });
 
-  route.post('/:id/genAST', function (req, res, next) {
-    //res.json(service.get(req.params.name))
-  });
-
-  route.post('/:id/compile', function (req, res, next) {
-    //res.json(service.get(req.params.name))
-  });
 };

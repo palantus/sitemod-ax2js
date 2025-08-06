@@ -32,6 +32,19 @@ export default class Element extends Entity{
     let obj = {id: this._id}
     Object.assign(obj, this.props);
     obj.children = this.rels
+    let genPath = (e, curPathElements) => {
+      if(e.tags.includes("element"))
+        return curPathElements;
+      let rels = e.relsrev;
+      let rel = rels ? Object.keys(rels).find(k => k != "element") : null;
+      let parent = rel ? rels[rel]?.[0] : null;
+      if(parent){
+        curPathElements.push({id: parent._id, name: parent.name, type: parent.type || null});
+        return genPath(parent, curPathElements);
+      }
+      return curPathElements;
+    }
+    obj.elementSubPath = genPath(this, []);
     for(let rel in obj.children){
       if(rel == "element" || rel == "xpp" || rel == "js" || rel == "ast"){
         obj.parentElementId = obj.children[rel][0]._id

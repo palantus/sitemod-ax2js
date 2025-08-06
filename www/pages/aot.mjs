@@ -2,6 +2,7 @@ const elementName = 'ax-aot-page'
 
 import {goto, state, stylesheets} from "../system/core.mjs"
 import "../components/field-edit.mjs"
+import "../components/breadcrumbs.mjs"
 import { alertDialog } from "../components/dialog.mjs"
 import api from "../system/api.mjs";
 
@@ -14,6 +15,16 @@ template.innerHTML = `
       padding: 10px;
     }
     #description-header{text-decoration: underline;}
+    #breadcrumbs{
+      margin-bottom: 10px;
+      display: block;
+    }
+    #view-select-container{
+      margin-bottom: 10px;
+    }
+    #elements{
+      margin-top: 10px;
+    }
     
 	  .grid-container {
       display: grid;
@@ -46,18 +57,22 @@ template.innerHTML = `
         <div id="elements"></div>
       </div>
       <div class="right">
-        <div>
+        <breadcrumbs-component id="breadcrumbs"></breadcrumbs-component>
+        <div id="view-select-container">
           <label for="view-select">View: </label>
           <select id="view-select">
             <option value="empty"></option>
             <option value="meta" selected>Metadata</option>
             <option value="children" selected>Children</option>
+            <option value="ast" selected>AST</option>
+            <option value="xpp" selected>X++ code</option>
+            <option value="js" selected>Javascript code</option>
           </select>
         </div>
         <div id="view">
           <div id="empty-view" class="view"></div>
-          <div id="meta-view" class="view"></div>
-          <div id="children-view" class="view">
+          <div id="meta-view" class="view hidden"></div>
+          <div id="children-view" class="view hidden">
             <table>
               <thead>
                 <tr>
@@ -68,6 +83,21 @@ template.innerHTML = `
               </thead>
               <tbody id="children"></tbody>
             </table>
+          </div>
+          <div id="ast-view" class="view hidden">
+            <div id="ast-controls">
+              <button id="ast-gen">Regenerate AST</button>
+            </div>
+            <pre id="ast-content"></pre>
+          </div>
+          <div id="xpp-view" class="view hidden">
+            <pre id="xpp-content"></pre>
+          </div>
+          <div id="js-view" class="view hidden">
+            <div id="js-controls">
+              <button id="js-gen">Compile</button>
+            </div>
+            <pre id="js-content"></pre>
           </div>
         </div>
       </div>
@@ -85,13 +115,25 @@ class Element extends HTMLElement {
 
     this.typeSelectChanged = this.typeSelectChanged.bind(this);
     this.elementChanged = this.elementChanged.bind(this);
+    this.elementSelectionChanged = this.elementSelectionChanged.bind(this);
     this.childClick = this.childClick.bind(this);
     this.refreshView = this.refreshView.bind(this);
+    this.breadcrumbsClicked = this.breadcrumbsClicked.bind(this);
+    this.refreshViewAST = this.refreshViewAST.bind(this);
+    this.refreshViewXpp = this.refreshViewXpp.bind(this);
+    this.refreshViewJS = this.refreshViewJS.bind(this);
 
     this.shadowRoot.getElementById("type-select").addEventListener("change", this.typeSelectChanged);
-    this.shadowRoot.getElementById("elements").addEventListener("click", this.elementChanged);
+    this.shadowRoot.getElementById("elements").addEventListener("click", this.elementSelectionChanged);
     this.shadowRoot.getElementById("view-select").addEventListener("click", this.refreshView);
     this.shadowRoot.getElementById("children").addEventListener("click", this.childClick);
+    this.shadowRoot.getElementById("breadcrumbs").addEventListener("item-clicked", this.breadcrumbsClicked);
+    this.shadowRoot.getElementById("ast-gen").addEventListener("click", async () => {
+      api.post(`ax/gen-ast`, {id: this.meta.id}).then(this.refreshViewAST);
+    });
+    this.shadowRoot.getElementById("js-gen").addEventListener("click", async () => {
+      api.post(`ax/compile`, {id: this.meta.id}).then(this.refreshViewJS);
+    });
   }
 
   async refreshData(){
@@ -112,15 +154,20 @@ class Element extends HTMLElement {
     `).join('');
   }
 
-  async elementChanged(e){
+  elementSelectionChanged(e){
     let id = e.target.dataset.id;
-    this.shadowRoot.getElementById("view").dataset.id = id;
-
-    this.refreshView();
+    this.elementChanged(id);
   }
 
-  async refreshView(){
-    let id = this.shadowRoot.getElementById("view").dataset.id;
+  async elementChanged(id){
+    this.shadowRoot.getElementById("view").dataset.id = id;
+
+    this.meta = await api.get(`meta/${id}`);
+    this.refreshView();
+    this.refreshBreadcrumbs();
+  }
+
+  refreshView(){
     let view = this.shadowRoot.getElementById("view-select").value;
 
     this.shadowRoot.getElementById("view").querySelectorAll(".view").forEach(e => {
@@ -129,35 +176,85 @@ class Element extends HTMLElement {
 
     switch(view){
       case "meta":
-        return this.refreshViewMeta(id);
+        return this.refreshViewMeta();
       case "children":
-        return this.refreshViewChildren(id);
+        return this.refreshViewChildren();
+      case "ast":
+        return this.refreshViewAST();
+      case "xpp":
+        return this.refreshViewXpp();
+      case "js":
+        return this.refreshViewJS();
     }
   }
 
-  async refreshViewMeta(id){
-    if(!id) return this.shadowRoot.getElementById("meta-view").innerHTML = '';
-    let meta = await api.get(`meta/${id}`);
+  refreshBreadcrumbs(){
+    let bc = this.shadowRoot.getElementById("breadcrumbs");
+    let path = [...this.meta.elementSubPath];
+    path.unshift(this.meta);
+    let type = this.shadowRoot.getElementById("type-select").value;
+    path.push(type);
+    bc.setPath(path);
+  }
+
+  refreshViewMeta(){
+    if(!this.meta) return this.shadowRoot.getElementById("meta-view").innerHTML = '';
     this.shadowRoot.getElementById("meta-view").innerHTML = `
-      <pre>${JSON.stringify(meta, 0, 2)}</pre>
+      <pre>${JSON.stringify(this.meta, 0, 2)}</pre>
     `
   }
   
-  async refreshViewChildren(id){
-    if(!id) return this.shadowRoot.getElementById("children").innerHTML = '';
-    let meta = await api.get(`meta/${id}`);
-    let children = meta.children || {};
+  refreshViewChildren(){
+    if(!this.meta) return this.shadowRoot.getElementById("children").innerHTML = '';
+    let children = this.meta.children || {};
     this.shadowRoot.getElementById("children").innerHTML = Object.keys(children)
                                                                  .reduce((all, cur) => [...children[cur], ...all], [])
                                                                  .map(c => `
       <tr><td>${c.type||"N/A"}</td><td>${c.name||c.type}</td><td><button data-id="${c.id}">Show</button></td></tr>
     `).join('')||"";
   }
+  
+  async refreshViewXpp(){
+    this.shadowRoot.getElementById("xpp-content").innerHTML = '';
+    if(!this.meta) return; 
+    let res = await api.fetch(`meta/${this.meta.id}/xpp`, {}, true);
+    if(!res) return;
+    let xpp = await res.text();
+    this.shadowRoot.getElementById("xpp-content").innerHTML = `
+      <pre>${xpp}</pre>
+    `.trim();
+  }
 
-  async childClick(e){
+  async refreshViewJS(){
+    this.shadowRoot.getElementById("js-content").innerHTML = '';
+    if(!this.meta) return;
+    this.shadowRoot.getElementById("js-gen").classList.toggle("hidden", this.meta.elementSubPath.length != 0);
+    let res = await api.fetch(`meta/${this.meta.id}/js`, {}, true);
+    if(!res) return;
+    let js = await res.text();
+    this.shadowRoot.getElementById("js-content").innerHTML = `
+      <pre>${js}</pre>
+    `.trim();
+  }
+  
+  async refreshViewAST(){
+    this.shadowRoot.getElementById("ast-content").innerHTML = '';
+    if(!this.meta) return;
+    let ast = await api.get(`meta/${this.meta.id}/ast`);
+    if(!ast) return;
+    this.shadowRoot.getElementById("ast-content").innerHTML = `
+      <pre>${JSON.stringify(ast, null, 2)}</pre>
+    `.trim();
+  }
+  childClick(e){
     let id = e.target.dataset.id;
     if(!id) return;
-    this.elementChanged(e);
+    this.elementChanged(id);
+  }
+
+  breadcrumbsClicked(e){
+    if(isNaN(e.detail.id)) return;
+    this.elementChanged(e.detail.id);
   }
 
   connectedCallback() {

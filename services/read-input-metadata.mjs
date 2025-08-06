@@ -7,6 +7,7 @@ import {convert, expandAllElements, mergeExtensions, updateReferences} from "./c
 export async function readMetadata(){
   Entity.search("tag:element").delete();
   Entity.search("tag:tablefield").delete();
+  Entity.search("tag:classfunction").delete();
   let d365 = new D365();
   d365.readLabels("./storage/input/labels")
   d365.readFolder("./storage/input/models")

@@ -16,7 +16,9 @@ template.innerHTML = `
     <h1>AX administration</h1>
 
     <button class="styled" id="read">Read metadata</button>
-    <button class="styled" id="compile">Compile all</button>
+    <button class="styled" id="genast">Gen AST</button>
+    <button class="styled" id="compile">Compile</button>
+    <button class="styled" id="refreshmenu">Refresh Menu</button>
   </div>
 `;
 
@@ -32,9 +34,19 @@ class Element extends HTMLElement {
       let output = await api.post("ax/read-metadata")
       alertDialog(`<pre>${JSON.stringify(output, null, 2)}</pre>`, {title: "Output"})
     })
+    
+    this.shadowRoot.getElementById("genast").addEventListener("click", async () => {
+      let output = await api.post("ax/gen-ast")
+      alertDialog(`<pre>${JSON.stringify(output, null, 2)}</pre>`, {title: "Output"})
+    })
 
     this.shadowRoot.getElementById("compile").addEventListener("click", async () => {
       let output = await api.post("ax/compile")
+      alertDialog(`<pre>${JSON.stringify(output, null, 2)}</pre>`, {title: "Output"})
+    })
+    
+    this.shadowRoot.getElementById("refreshmenu").addEventListener("click", async () => {
+      let output = await api.post("ax/refresh-menu")
       alertDialog(`<pre>${JSON.stringify(output, null, 2)}</pre>`, {title: "Output"})
     })
   }
