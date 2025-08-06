@@ -86,7 +86,7 @@ template.innerHTML = `
           </div>
           <div id="ast-view" class="view hidden">
             <div id="ast-controls">
-              <button id="ast-gen">Regenerate AST</button>
+              <button id="ast-gen" class="styled">Regenerate AST</button>
             </div>
             <pre id="ast-content"></pre>
           </div>
@@ -95,7 +95,7 @@ template.innerHTML = `
           </div>
           <div id="js-view" class="view hidden">
             <div id="js-controls">
-              <button id="js-gen">Compile</button>
+              <button id="js-gen" class="styled">Compile</button>
             </div>
             <pre id="js-content"></pre>
           </div>
@@ -125,7 +125,7 @@ class Element extends HTMLElement {
 
     this.shadowRoot.getElementById("type-select").addEventListener("change", this.typeSelectChanged);
     this.shadowRoot.getElementById("elements").addEventListener("click", this.elementSelectionChanged);
-    this.shadowRoot.getElementById("view-select").addEventListener("click", this.refreshView);
+    this.shadowRoot.getElementById("view-select").addEventListener("change", this.refreshView);
     this.shadowRoot.getElementById("children").addEventListener("click", this.childClick);
     this.shadowRoot.getElementById("breadcrumbs").addEventListener("item-clicked", this.breadcrumbsClicked);
     this.shadowRoot.getElementById("ast-gen").addEventListener("click", async () => {
@@ -218,11 +218,8 @@ class Element extends HTMLElement {
     this.shadowRoot.getElementById("xpp-content").innerHTML = '';
     if(!this.meta) return; 
     let res = await api.fetch(`meta/${this.meta.id}/xpp`, {}, true);
-    if(!res) return;
-    let xpp = await res.text();
-    this.shadowRoot.getElementById("xpp-content").innerHTML = `
-      <pre>${xpp}</pre>
-    `.trim();
+    let xpp = res ? await res.text() : null;
+    this.shadowRoot.getElementById("xpp-content").innerText = xpp || "<empty>";
   }
 
   async refreshViewJS(){
@@ -230,21 +227,15 @@ class Element extends HTMLElement {
     if(!this.meta) return;
     this.shadowRoot.getElementById("js-gen").classList.toggle("hidden", this.meta.elementSubPath.length != 0);
     let res = await api.fetch(`meta/${this.meta.id}/js`, {}, true);
-    if(!res) return;
-    let js = await res.text();
-    this.shadowRoot.getElementById("js-content").innerHTML = `
-      <pre>${js}</pre>
-    `.trim();
+    let js = res ? await res.text() : null;
+    this.shadowRoot.getElementById("js-content").innerText = js || "<empty>";
   }
   
   async refreshViewAST(){
     this.shadowRoot.getElementById("ast-content").innerHTML = '';
     if(!this.meta) return;
     let ast = await api.get(`meta/${this.meta.id}/ast`);
-    if(!ast) return;
-    this.shadowRoot.getElementById("ast-content").innerHTML = `
-      <pre>${JSON.stringify(ast, null, 2)}</pre>
-    `.trim();
+    this.shadowRoot.getElementById("ast-content").innerText = ast ? JSON.stringify(ast, null, 2) : "<empty>";
   }
   childClick(e){
     let id = e.target.dataset.id;
